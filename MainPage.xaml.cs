@@ -67,5 +67,24 @@ public partial class MainPage : ContentPage
     }
     
     
-    
+}// --- EKSTRA SINIF: RENK DÖNÜŞTÜRÜCÜ ---
+// Bu sınıf XAML tarafında kullanılır. Tarihe bakar, eğer tarih geçmişse Kırmızı, değilse Siyah renk verir.
+public class OverdueColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is DateTime date)
+        {
+            // Eğer tarih bugünden küçükse (geçmişse) Kırmızı döndür
+            // DateTime.Today kullanıyoruz ki saat farkından dolayı bugün girilenler kırmızı olmasın.
+            if (date.Date < DateTime.Today)
+                return Colors.Red;
+        }
+        return Colors.Black; // Değilse varsayılan renk
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
 }
