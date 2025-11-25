@@ -8,23 +8,32 @@
         <local:OverdueColorConverter x:Key="OverdueColorConverter" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto, *" Padding="20" Margin="20">
+    <Grid RowDefinitions="Auto, *" Padding="40" Margin="40">
        
-       <Border Grid.Row="0" Margin="0,0,0,10" StrokeShape="RoundRectangle 10">
-           <VerticalStackLayout Margin="10" Padding="10">
-               <Entry x:Name="Title" Placeholder="Enter a todo Item" />
+       <Border Grid.Row="0" Margin="0,0,0,50"  BackgroundColor="Black">
+           <VerticalStackLayout Margin="20" Padding="20">
+               <Entry x:Name="Title" Placeholder="Enter a To-Do Item" BackgroundColor="White" />
                <HorizontalStackLayout Padding="20" Margin="10">
-                    <Label Text="Due Date :" VerticalOptions="Center"></Label>
-                    <DatePicker x:Name="DueDate" VerticalOptions="Center" ></DatePicker>
+                   <Border Stroke="#7f8d93"
+                           StrokeThickness="0.5"
+                           Background="White"
+                           Padding="10"
+                           StrokeShape="RoundRectangle 4">
+                       <Label Text="Due Date :" VerticalOptions="Center" BackgroundColor="White" />
+                   </Border>
+                    <DatePicker x:Name="DueDate" VerticalOptions="Center" BackgroundColor="White" ></DatePicker>
                </HorizontalStackLayout>
-               <Button x:Name="AddButton" Text="Save" Clicked="AddButton_OnClicked"></Button>
+               <Button x:Name="AddButton" Text="Save" TextColor="Black" FontSize="20" Clicked="AddButton_OnClicked" CornerRadius="0" BackgroundColor="DimGrey"></Button>
            </VerticalStackLayout>
        </Border>
 
        <ListView x:Name="TasksListView" 
                  Grid.Row="1"
                  ItemSelected="TasksListView_OnItemSelected"
-                 HasUnevenRows="True">
+                 HasUnevenRows="True"
+                 BackgroundColor="Black"
+                 
+                 >
            
            <ListView.ItemTemplate>
                <DataTemplate>
@@ -33,11 +42,13 @@
                            
                            <Label Text="{Binding Title}"   
                                   VerticalOptions="Center"
-                                  FontSize="16">
+                                  FontSize="16"
+                                  TextColor="{Binding DueDate, Converter={StaticResource OverdueColorConverter}}">
+                               
                                <Label.Triggers>
                                    <DataTrigger TargetType="Label" Binding="{Binding IsComplete}" Value="True">
                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                       <Setter Property="TextColor" Value="Gray"/>
+                                       <Setter Property="TextColor" Value="White"/>
                                    </DataTrigger>
                                </Label.Triggers>
                            </Label> 
@@ -47,7 +58,7 @@
                                   TextColor="{Binding DueDate, Converter={StaticResource OverdueColorConverter}}">
                                <Label.Triggers>
                                    <DataTrigger TargetType="Label" Binding="{Binding IsComplete}" Value="True">
-                                       <Setter Property="TextColor" Value="Gray"/>
+                                       <Setter Property="TextColor" Value="White"/>
                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
                                    </DataTrigger>
                                </Label.Triggers>
