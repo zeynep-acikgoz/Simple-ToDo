@@ -54,9 +54,18 @@ public partial class MainPage : ContentPage
 
     private void TasksListView_OnItemSelected(object? sender, SelectedItemChangedEventArgs e)
     {
+        // Seçim boşsa (unselect durumunda) işlem yapma
+        if (e.SelectedItem == null) return;
+        
         var item = e.SelectedItem as TodoItem;
         FakeDb.ChageCompletionStatus(item);
+        
+        TasksListView.SelectedItem = null; //arkaplan kalmasın diye
+        
         RefreshListView();
        
     }
+    
+    
+    
 }
