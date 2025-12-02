@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using CetTodoApp.Data; 
 
 namespace CetTodoApp;
 
@@ -19,6 +20,13 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
+       
+        builder.Services.AddSingleton<TodoItemDatabase>();
+
+       
+        builder.Services.AddSingleton<MainPage>();
+
+       
         return builder.Build();
     }
 }

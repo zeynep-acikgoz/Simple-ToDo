@@ -1,4 +1,5 @@
 ﻿using CetTodoApp.Data;
+using CetTodoApp.Models; 
 using System.Globalization;
 
 namespace CetTodoApp;
@@ -6,76 +7,96 @@ namespace CetTodoApp;
 public partial class MainPage : ContentPage
 {
    
-
-    public MainPage()
+    TodoItemDatabase _database;
+    
+    public MainPage(TodoItemDatabase database)
     {
         InitializeComponent();
-        FakeDb.AddToDo("Test1" ,DateTime.Now.AddDays(-1));
-        FakeDb.AddToDo("Test2" ,DateTime.Now.AddDays(1));
-        FakeDb.AddToDo("Test3" ,DateTime.Now);
-        FakeDb.AddToDo("CET301 Calculator App" ,DateTime.Now.AddDays(-2));
-        FakeDb.AddToDo("CET301 To-Do App" ,DateTime.Now.AddDays(2));
-        RefreshListView();
-        ;
-
-
+        _database = database;
     }
 
+    
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await RefreshListView();
+    }
 
     private async void AddButton_OnClicked(object? sender, EventArgs e)
     {
-     
+       
         if (string.IsNullOrWhiteSpace(Title.Text))
         {
             await DisplayAlert("ERROR", "Task title cannot be empty. Please enter a title.", "OK");
             return; 
         }
 
-        
         if (DueDate.Date < DateTime.Today)
         {
             await DisplayAlert("ERROR", "You cannot create a task with a past date. Please choose a future date.", "OK");
             return;
         }
         
-        FakeDb.AddToDo(Title.Text, DueDate.Date);
-        Title.Text = string.Empty;
-        DueDate.Date=DateTime.Now;
-        RefreshListView();
-    }
+       
+        var newItem = new TodoItem
+        {
+            Title = Title.Text,
+            DueDate = DueDate.Date,
+            CreatedDate = DateTime.Now,
+            IsComplete = false
+        };
 
-    private void RefreshListView()
-    {
-        TasksListView.ItemsSource = null;
-        TasksListView.ItemsSource = FakeDb.Data.Where(x => !x.IsComplete ||
-                                                           (x.IsComplete && x.DueDate > DateTime.Now.AddDays(-1)))
-            .ToList();
-    }
-
-    private void TasksListView_OnItemSelected(object? sender, SelectedItemChangedEventArgs e)
-    {
+        await _database.SaveItemAsync(newItem);
         
+        Title.Text = string.Empty;
+        DueDate.Date = DateTime.Now;
+      
+        await RefreshListView();
+    }
+
+    
+    private async Task RefreshListView()
+    {
+        var allItems = await _database.GetItemsAsync();
+    
+        var sortedItems = allItems
+            
+            .Where(x => !x.IsComplete || (x.IsComplete && x.DueDate > DateTime.Now.AddDays(-1)))
+            
+            .OrderBy(x => x.DueDate)
+        
+            .ToList();
+
+       
+        TasksListView.ItemsSource = null;
+        TasksListView.ItemsSource = sortedItems;
+    }
+
+    private async void TasksListView_OnItemSelected(object? sender, SelectedItemChangedEventArgs e)
+    {
         if (e.SelectedItem == null) return;
         
         var item = e.SelectedItem as TodoItem;
-        FakeDb.ChageCompletionStatus(item);
+        
+        // YENİ KISIM: Durumu tersine çevir ve veritabanına kaydet
+        if (item != null)
+        {
+            item.IsComplete = !item.IsComplete; // True ise False, False ise True yap
+            await _database.SaveItemAsync(item); // Güncellemeyi kaydet
+        }
         
         TasksListView.SelectedItem = null; 
-        
-        RefreshListView();
-       
+        await RefreshListView();
     }
-    
-    
 }
 
+// Senin Converter sınıfın aynen kalıyor
 public class OverdueColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is DateTime date)
         {
-            
             if (date.Date < DateTime.Today)
                 return Colors.Red;
         }
